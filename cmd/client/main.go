@@ -13,7 +13,7 @@ import (
 func main() {
 	client := greetv1connect.NewGreetServiceClient(
 		http.DefaultClient,
-		"http://localhost:8080",
+		"http://localhost:8080/grpc",
 		// connect.WithGRPC(),
 	)
 	res, err := client.Greet(

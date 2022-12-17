@@ -31,14 +31,21 @@ func (s *GreetServer) Greet(
 
 func main() {
 	greeter := &GreetServer{}
-	mux := http.NewServeMux()
+	api := http.NewServeMux()
 	// create path and handler from implementation of grpc service
 	path, handler := greetv1connect.NewGreetServiceHandler(greeter)
 	// register handler with path to mux
-	mux.Handle(path, handler)
+	api.Handle(path, handler)
+
+	mux := http.NewServeMux()
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "http handler")
+	}))
+	mux.Handle("/grpc/", http.StripPrefix("/grpc", h2c.NewHandler(api, &http2.Server{})))
+
 	http.ListenAndServe(
 		"localhost:8080",
 		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
+		mux,
 	)
 }
