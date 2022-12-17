@@ -18,10 +18,12 @@ func main() {
 		"http://localhost:8080",
 		// connect.WithGRPC(),
 	)
+	req := connect.NewRequest(&greetv1.GreetRequest{Name: "Jane"})
+	req.Header().Set("Acme-Tenant-Id", "1234")
+
 	res, err := client.Greet(
 		context.Background(),
-		connect.NewRequest(
-			&greetv1.GreetRequest{Name: "Jane"}),
+		req,
 	)
 	if err != nil {
 		log.Println(err)

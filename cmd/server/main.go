@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	greetv1 "example/gen/greet/v1"
 	"example/gen/greet/v1/greetv1connect"
 	"fmt"
@@ -33,6 +32,8 @@ func (s *GreetServer) Greet(
 	}
 
 	log.Println("Request headers: ", req.Header())
+	fmt.Println(req.Header().Get("Acme-Tenant-Id"))
+
 	res := connect.NewResponse(
 		&greetv1.GreetResponse{
 			Greeting: greeting,
@@ -42,10 +43,10 @@ func (s *GreetServer) Greet(
 }
 
 func validateGreetRequest(msg *greetv1.GreetRequest) error {
-	// return nil
+	return nil
 
 	// for causing an error intentionally
-	return errors.New("invalid arguments")
+	// return errors.New("invalid arguments")
 }
 
 func doGreetWork(ctx context.Context, msg *greetv1.GreetRequest) (string, error) {
