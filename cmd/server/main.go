@@ -57,21 +57,14 @@ func doGreetWork(ctx context.Context, msg *greetv1.GreetRequest) (string, error)
 
 func main() {
 	greeter := &GreetServer{}
-	api := http.NewServeMux()
+	mux := http.NewServeMux()
 	// create path and handler from implementation of grpc service
 	path, handler := greetv1connect.NewGreetServiceHandler(greeter)
 	// register handler with path to mux
-	api.Handle(path, handler)
-
-	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "http handler")
-	}))
-	mux.Handle("/grpc/", http.StripPrefix("/grpc", h2c.NewHandler(api, &http2.Server{})))
-
+	mux.Handle(path, handler)
 	http.ListenAndServe(
 		"localhost:8080",
 		// Use h2c so we can serve HTTP/2 without TLS.
-		mux,
+		h2c.NewHandler(mux, &http2.Server{}),
 	)
 }
