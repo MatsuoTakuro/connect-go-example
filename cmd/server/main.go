@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	greetv1 "example/gen/greet/v1"
 	"example/gen/greet/v1/greetv1connect"
 	"fmt"
@@ -20,13 +21,38 @@ func (s *GreetServer) Greet(
 	req *connect.Request[greetv1.GreetRequest],
 ) (*connect.Response[greetv1.GreetResponse], error) {
 
+	if err := ctx.Err(); err != nil {
+		return nil, err // automatically coded correctly
+	}
+	if err := validateGreetRequest(req.Msg); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	greeting, err := doGreetWork(ctx, req.Msg)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnknown, err)
+	}
+
 	log.Println("Request headers: ", req.Header())
 	res := connect.NewResponse(
 		&greetv1.GreetResponse{
-			Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
+			Greeting: greeting,
 		})
 	res.Header().Set("Greet-Version", "v1")
 	return res, nil
+}
+
+func validateGreetRequest(msg *greetv1.GreetRequest) error {
+	// return nil
+
+	// for causing an error intentionally
+	return errors.New("invalid arguments")
+}
+
+func doGreetWork(ctx context.Context, msg *greetv1.GreetRequest) (string, error) {
+	return fmt.Sprintf("Hello, %s!", msg.Name), nil
+
+	// for causing an error intentionally
+	// return "", errors.New("internal error")
 }
 
 func main() {

@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	greetv1 "example/gen/greet/v1"
 	"example/gen/greet/v1/greetv1connect"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -23,6 +25,11 @@ func main() {
 	)
 	if err != nil {
 		log.Println(err)
+		fmt.Println(connect.CodeOf(err))
+		if connectErr := new(connect.Error); errors.As(err, &connectErr) {
+			fmt.Println("connectErr.Message: ", connectErr.Message())
+			fmt.Println("connectErr.Details: ", connectErr.Details())
+		}
 		return
 	}
 	log.Println(res.Msg.Greeting)
